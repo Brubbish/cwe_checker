@@ -8,7 +8,8 @@
 //!
 //! ## How the check works
 //!
-//! Using dataflow analysis we search for an execution path where a memory access using the return value of
+//! 这句话太难懂了....通过数据流分析，寻找执行流，该执行流的内存访问发生在判断（有可能返回空指针的）函数返回值的条件跳转之前，有则找到positive
+//! Using dataflow analysis, we search for an execution path where a memory access using the return value of
 //! a symbol happens before the return value is checked through a conditional jump instruction.
 //!
 //! ### Symbols configurable in config.json
@@ -81,7 +82,7 @@ pub fn check_cwe(
     let project = analysis_results.project;
     let pointer_inference_results = analysis_results.pointer_inference.unwrap();
 
-    let (cwe_sender, cwe_receiver) = crossbeam_channel::unbounded();
+    let (cwe_sender, cwe_receiver) = crossbeam_channel::unbounded();    //?
 
     let config: Config = serde_json::from_value(cwe_params.clone()).unwrap();
     let symbol_map = crate::utils::symbol_utils::get_symbol_map(project, &config.symbols[..]);
