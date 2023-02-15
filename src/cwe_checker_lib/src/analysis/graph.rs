@@ -150,7 +150,7 @@ pub enum Edge<'a> {
     /// An edge between the `BlkStart` and `BlkEnd` nodes of a basic block.
     Block,
     /// An edge corresponding to an intraprocedural jump instruction.
-    /// If the jump is only taken if a previous conditional jump is not taken,
+    /// If the jump is only taken when a previous conditional jump is not taken,
     /// then a reference to the untaken conditional jump is also added to the jump label.
     Jump(&'a Term<Jmp>, Option<&'a Term<Jmp>>),
     /// An edge corresponding to a function call instruction.
