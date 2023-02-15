@@ -127,7 +127,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
     let binary_file_path = PathBuf::from(args.binary.clone().unwrap());
 
     let (binary, project, mut all_logs) =
-        disassemble_binary(&binary_file_path, bare_metal_config_opt, args.verbose)?;
+        disassemble_binary(&binary_file_path, bare_metal_config_opt, args.verbose)?; //返回byte vector格式的binary、Project结构体、vector格式的logs
 
     // Generate the control flow graph of the program
     let extern_sub_tids = project
@@ -139,22 +139,26 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
         .collect();
     let control_flow_graph = graph::get_program_cfg(&project.program, extern_sub_tids);
 
-    let analysis_results = AnalysisResults::new(&binary, &control_flow_graph, &project);
+    let analysis_results = AnalysisResults::new(&binary, &control_flow_graph, &project);    //不管咋样都先抽出控制流图
 
-    let modules_depending_on_string_abstraction = BTreeSet::from_iter(["CWE78"]);
+    let modules_depending_on_string_abstraction = BTreeSet::from_iter(["CWE78"]);   //：命令注入，要进行字符串抽象？
     let modules_depending_on_pointer_inference = BTreeSet::from_iter([
-        "CWE119", "CWE134", "CWE416", "CWE476", "Memory", "CWE190", "CWE789",
+        "CWE119", "CWE134", "CWE416", "CWE476", "Memory", "CWE190", "CWE789",   //指针推理
     ]);
 
+    //解析是否要进行字符串抽象或者指针推理（TODO），字符串抽象需要指针推理
     let string_abstraction_needed = modules
-        .iter()
+        .iter() //iter：迭代器
         .any(|module| modules_depending_on_string_abstraction.contains(&module.name));
 
     let pi_analysis_needed = string_abstraction_needed
         || modules
             .iter()
             .any(|module| modules_depending_on_pointer_inference.contains(&module.name));
-
+    
+    //以下几个分析过程在analysis下对应文件夹的mod.rs里
+    
+    //函数签名计算为指针推理服务
     // Compute function signatures if required
     let function_signatures = if pi_analysis_needed {
         let (function_signatures, mut logs) = analysis_results.compute_function_signatures();
@@ -185,22 +189,22 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
         analysis_results.with_string_abstraction(string_abstraction_results.as_ref());
 
     // Print debug and then return.
-    // Right now there is only one debug printing function.
+    // Right now there is only one debug printing function.     //似乎只能print出指针推理的部分
     // When more debug printing modes exist, this behaviour will change!
     if args.debug {
         cwe_checker_lib::analysis::pointer_inference::run(
             &analysis_results,
-            serde_json::from_value(config["Memory"].clone()).unwrap(),
+            serde_json::from_value(config["Memory"].clone()).unwrap(),  //涉及到动态分配内存的函数
             true,
             false,
         );
         return Ok(());
     }
-
+    //执行每个cwe模块
     // Execute the modules and collect their logs and CWE-warnings.
     let mut all_cwes = Vec::new();
     for module in modules {
-        let (mut logs, mut cwes) = (module.run)(&analysis_results, &config[&module.name]);
+        let (mut logs, mut cwes) = (module.run)(&analysis_results, &config[&module.name]);//执行，返回warning
         all_logs.append(&mut logs);
         all_cwes.append(&mut cwes);
     }
@@ -217,7 +221,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
         }
     }
     print_all_messages(all_logs, all_cwes, args.out.as_deref(), args.json);
-    Ok(())
+    Ok(())  //结束
 }
 
 /// Only keep the modules specified by the `--partial` parameter in the `modules` list.

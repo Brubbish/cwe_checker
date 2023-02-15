@@ -1,0 +1,9 @@
+{
+    "grammarly.selectors": [
+        {
+            "language": "rust",
+            "scheme": "file",
+            "pattern": "src/cwe_checker_lib/src/checkers/cwe_676.rs"
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 # Created by https://www.gitignore.io/api/c,ocaml,python
-
+cwe_checker.code-workspace
 ### C ###
 # Prerequisites
 *.d

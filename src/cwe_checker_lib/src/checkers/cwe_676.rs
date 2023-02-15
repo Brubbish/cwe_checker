@@ -52,9 +52,8 @@ pub fn get_calls<'a>(
 ) -> Vec<(&'a str, &'a Tid, &'a str)> {
     let mut calls: Vec<(&str, &Tid, &str)> = Vec::new();
     for sub in subfunctions.values() {
-        calls.append(&mut get_calls_to_symbols(sub, dangerous_symbols));
+        calls.append(&mut get_calls_to_symbols(sub, dangerous_symbols));    //还没看
     }
-
     calls
 }
 
@@ -66,9 +65,15 @@ pub fn generate_cwe_warnings<'a>(
     for (sub_name, jmp_tid, target_name) in dangerous_calls.iter() {
         let address: &String = &jmp_tid.address;
         let description: String = format!(
-            "(Use of Potentially Dangerous Function) {sub_name} ({address}) -> {target_name}"
+            "(Use of Potentially Dangerous Function) {sub_name} ({address}) -> {target_name}"   //所在函数+地址+危险函数，fomat!生成格式化的字符串赋值给左边的变量
         );
-        let cwe_warning = CweWarning::new(
+
+        /*
+            CweWarning::new方法，
+            前三个构建出了warning的框架，
+            后面构建出了完整的warning需要的信息
+        */
+        let cwe_warning = CweWarning::new(  
             String::from(CWE_MODULE.name),
             String::from(CWE_MODULE.version),
             description,
@@ -80,7 +85,7 @@ pub fn generate_cwe_warnings<'a>(
             String::from("dangerous_function"),
             String::from(*target_name),
         ]]);
-
+        
         cwe_warnings.push(cwe_warning);
     }
 
@@ -96,27 +101,32 @@ pub fn resolve_symbols<'a>(
     let dangerous_symbols: HashSet<&'a String> = symbols.iter().collect();
     external_symbols
         .iter()
-        .filter_map(|(tid, symbol)| {
+        .filter_map(|(tid, symbol)| {//对(tid,symbol)进行过滤
             dangerous_symbols
-                .get(&symbol.name)
+                .get(&symbol.name)  //Option？？//symbol.name是string
                 .map(|name| (tid, name.as_str()))
         })
-        .collect()
+        .collect()//将剩下的键值对（.iter）收集到hashmap并**返回**
 }
 
 /// Iterate through all function calls inside the program and flag calls to those functions
 /// that are marked as unsafe via the configuration file.
-pub fn check_cwe(
-    analysis_results: &AnalysisResults,
+pub fn check_cwe(                               //调用时传入&AnalysisResults结构体（位于results.rs，猜测是几种分析完的结果）和config.json指针
+    analysis_results: &AnalysisResults,         //config.json: main.rs, :108
     cwe_params: &serde_json::Value,
 ) -> (Vec<LogMessage>, Vec<CweWarning>) {
     let project = analysis_results.project;
-    let config: Config = serde_json::from_value(cwe_params.clone()).unwrap();
+    let config: Config = serde_json::from_value(cwe_params.clone()).unwrap();   //危险函数集合
     let prog: &Term<Program> = &project.program;
+
+    //subfunction：所有子函数函数
+    //external symbol：链接的库函数
+    //dangerous symbol：对外部函数与config.json进行匹配
+    //dangerous call：把程序用到的函数和上面的符号进行对比
     let subfunctions = &prog.term.subs;
     let external_symbols: &BTreeMap<Tid, ExternSymbol> = &prog.term.extern_symbols;
     let dangerous_symbols = resolve_symbols(external_symbols, &config.symbols);
     let dangerous_calls = get_calls(subfunctions, &dangerous_symbols);
 
-    (vec![], generate_cwe_warnings(dangerous_calls))
+    (vec![], generate_cwe_warnings(dangerous_calls))    //构建警告方法，返回（log，warning）
 }
