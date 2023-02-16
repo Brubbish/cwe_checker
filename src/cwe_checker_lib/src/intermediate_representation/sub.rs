@@ -7,7 +7,7 @@ use crate::prelude::*;
 /// i.e. calling a subroutine will execute the first block in the list of basic blocks.
 /// A subroutine may have multiple exits, which are identified by `Jmp::Return` instructions.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash, Clone)]
-pub struct Sub {
+pub struct Sub {    //子函数
     /// The name of the subroutine
     pub name: String,
     /// The basic blocks belonging to the subroutine.

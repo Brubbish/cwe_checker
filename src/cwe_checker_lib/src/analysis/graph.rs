@@ -65,25 +65,21 @@ pub type Graph<'a> = DiGraph<Node<'a>, Edge<'a>>;
 /// to allow unambigous node identification.
 #[derive(Serialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Node<'a> {
-    /// A node corresponding to the start of a basic block,
-    /// i.e. to the point in time just before the execution of the block.
+
+    //每一个基本块分为两个结点：BlkStart和BlkEnd，  //这俩到底是啥玩意，‘边’是边吗....
+    //用Block边连接
     BlkStart(&'a Term<Blk>, &'a Term<Sub>),
-    /// A node corresponding to the end of the basic block,
-    /// i.e. to the point in time just after the execution of all `Def` instructions in the block
-    /// but before execution of the jump instructions at the end of the block.
     BlkEnd(&'a Term<Blk>, &'a Term<Sub>),
-    /// An artificial node. See the module-level documentation for more information.
+   
+    // 在call（jmp）某个函数（应该不包含外部函数）的过程中，正常的流中产生了以下两个结点
+    // 在跳转后先到一个虚拟的CallSource块，返回时也先进入虚拟的CallReturn块
+    // 如图：https://fkie-cad.github.io/cwe_checker/doc/images/internal_function_call.png
     CallReturn {
-        /// The block containing the callsite of the call.
         call: (&'a Term<Blk>, &'a Term<Sub>),
-        /// The block that the called functions returns to.
         return_: (&'a Term<Blk>, &'a Term<Sub>),
     },
-    /// An artificial node. See the module-level documentation for more information.
     CallSource {
-        /// The block containing the callsite of the call
         source: (&'a Term<Blk>, &'a Term<Sub>),
-        /// The block containing the target of the call, i.e. the first block of the target function.
         target: (&'a Term<Blk>, &'a Term<Sub>),
     },
 }
@@ -147,29 +143,23 @@ impl<'a> std::fmt::Display for Node<'a> {
 /// In this case the other jump reference points to the untaken conditional jump.
 #[derive(Serialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Edge<'a> {
-    /// An edge between the `BlkStart` and `BlkEnd` nodes of a basic block.
+
+    //Block边，从start指向end
+    //用户定义的jmp和call
+    //外部函数跳转，用ExternCallStub直接略过
     Block,
-    /// An edge corresponding to an intraprocedural jump instruction.
-    /// If the jump is only taken if a previous conditional jump is not taken,
-    /// then a reference to the untaken conditional jump is also added to the jump label.
     Jump(&'a Term<Jmp>, Option<&'a Term<Jmp>>),
-    /// An edge corresponding to a function call instruction.
-    /// Only generated for calls to functions inside the binary.
-    /// See the module-level documentation for more information.
     Call(&'a Term<Jmp>),
-    /// An edge corresponding to a call to a function not contained in the binary,
-    /// i.e. the target is located in a shared object loaded by the binary.
-    /// The edge goes directly from the callsite to the return-to-site inside the caller.
     ExternCallStub(&'a Term<Jmp>),
-    /// An artificial edge. See the module-level documentation for more information.
+
+    //在call某个函数的过程中，对应为：
+    //虚拟的CallSource块指向虚拟的CallReturn块；
+    //从子函数的Blkend指向虚拟的CallReturn块；
+    //从发出跳转的Blkend指向虚拟的CallSource块；
+    //从虚拟的CallReturn块指向后续的BlkStart块；
     CrCallStub,
-    /// An artificial edge. See the module-level documentation for more information.
     CrReturnStub,
-    /// An artificial edge to combine intra- and interprocedural data flows at the callsite of calls.
-    /// See the module-level documentation for more information.
     CallCombine(&'a Term<Jmp>),
-    /// An artificial edge to combine intra- and interprocedural data flows at the return-to site of calls.
-    /// See the module-level documentation for more information.
     ReturnCombine(&'a Term<Jmp>),
 }
 
