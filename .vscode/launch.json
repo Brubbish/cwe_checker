@@ -1,0 +1,123 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'cwe_checker_lib'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=cwe_checker_lib"
+                ],
+                "filter": {
+                    "name": "cwe_checker_lib",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'cwe_checker'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=cwe_checker",
+                    "--package=cwe_checker"
+                ],
+                "filter": {
+                    "name": "cwe_checker",
+                    "kind": "bin"
+                }
+            },
+            "args": [                
+                //" --partial CWE676",
+                "/home/bruce/Desktop/cwe_119.out",
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'cwe_checker'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=cwe_checker",
+                    "--package=cwe_checker"
+                ],
+                "filter": {
+                    "name": "cwe_checker",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'acceptance_tests_ghidra'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=acceptance_tests_ghidra"
+                ],
+                "filter": {
+                    "name": "acceptance_tests_ghidra",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'cwe_checker_install'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=cwe_checker_install",
+                    "--package=cwe_checker_install"
+                ],
+                "filter": {
+                    "name": "cwe_checker_install",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'cwe_checker_install'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=cwe_checker_install",
+                    "--package=cwe_checker_install"
+                ],
+                "filter": {
+                    "name": "cwe_checker_install",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

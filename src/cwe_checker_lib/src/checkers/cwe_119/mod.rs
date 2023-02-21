@@ -29,11 +29,11 @@ pub fn check_cwe(
 
     let context = Context::new(analysis_results, log_thread.get_msg_sender());
 
-    let mut fixpoint_computation =
-        crate::analysis::forward_interprocedural_fixpoint::create_computation(context, None);
+    let mut fixpoint_computation =   //把main里完整的分析结果传进去
+        crate::analysis::forward_interprocedural_fixpoint::create_computation(context, None);  
 
     for (sub_tid, entry_node_of_sub) in
-        crate::analysis::graph::get_entry_nodes_of_subs(analysis_results.control_flow_graph)
+        crate::analysis::graph::get_entry_nodes_of_subs(analysis_results.control_flow_graph)    //遍历每个函数入口的基本块
     {
         if let Some(function_sig) = analysis_results.function_signatures.unwrap().get(&sub_tid) {
             let fn_start_state = State::new(&sub_tid, function_sig, analysis_results.project);

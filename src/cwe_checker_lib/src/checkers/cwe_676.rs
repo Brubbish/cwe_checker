@@ -32,7 +32,7 @@ pub fn get_calls<'a>(
     dangerous_symbols: &'a HashMap<&'a Tid, &'a str>,
 ) -> Vec<(&'a str, &'a Tid, &'a str)> {
     let mut calls: Vec<(&str, &Tid, &str)> = Vec::new();
-    for sub in subfunctions.values() {
+    for sub in subfunctions.values() {  //取value，subfunctions.root.0.node.vals...
         calls.append(&mut get_calls_to_symbols(sub, dangerous_symbols));    //还没看完
     }
     calls

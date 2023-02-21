@@ -35,7 +35,7 @@ pub fn get_calls_to_symbols<'a, 'b>(
         for jmp in blk.term.jmps.iter() {
             if let Jmp::Call { target: dst, .. } = &jmp.term {      //target=目标
                 if symbols.contains_key(dst) {
-                    calls.push((sub.term.name.as_str(), &jmp.tid, symbols.get(dst).unwrap()));  //三元组（函数名、jmp标识、目标函数（？））
+                    calls.push((sub.term.name.as_str(), &jmp.tid, symbols.get(dst).unwrap()));  //?
                 }
             }
         }

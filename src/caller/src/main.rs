@@ -147,7 +147,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
     ]);
 
     //解析是否要进行字符串抽象或者指针推理（TODO），字符串抽象需要指针推理，指针推理需要函数签名计算
-    let string_abstraction_needed = modules
+    let string_abstraction_needed = modules //默认不用
         .iter() //iter：迭代器
         .any(|module| modules_depending_on_string_abstraction.contains(&module.name));
 
@@ -220,7 +220,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
         }
     }
     print_all_messages(all_logs, all_cwes, args.out.as_deref(), args.json);
-    Ok(())  //结束
+    Ok(())  //cmd结束
 }
 
 /// Only keep the modules specified by the `--partial` parameter in the `modules` list.
