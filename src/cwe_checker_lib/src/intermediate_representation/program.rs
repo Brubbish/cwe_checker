@@ -5,12 +5,11 @@ use std::collections::{BTreeMap, BTreeSet};
 /// The `Program` structure represents a disassembled binary.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct Program {
-    /// The known functions contained in the binary
+    /// 程序中所有用户函数
     pub subs: BTreeMap<Tid, Term<Sub>>,
-    /// Extern symbols linked to the binary by the linker.
+    /// 链接的库函数符号
     pub extern_symbols: BTreeMap<Tid, ExternSymbol>,
-    /// Entry points into to binary,
-    /// i.e. the term identifiers of functions that may be called from outside of the binary.
+    /// 所有可能进入程序的位置，包括外部的跳转
     pub entry_points: BTreeSet<Tid>,
     /// An offset that has been added to all addresses in the program compared to the addresses
     /// as specified in the binary file.
@@ -23,7 +22,7 @@ pub struct Program {
 }
 
 impl Program {
-    /// Find a block term by its term identifier.
+    /// Find a block term by its term identifier.   //块项？
     /// WARNING: The function simply iterates through all blocks,
     /// i.e. it is very inefficient for large projects!
     pub fn find_block(&self, tid: &Tid) -> Option<&Term<Blk>> {

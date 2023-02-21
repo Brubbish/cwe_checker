@@ -1,19 +1,11 @@
 use super::{Blk, Datatype, Expression, Project, Variable};
 use crate::prelude::*;
 
-/// A `Sub` or subroutine represents a function with a given name and a list of basic blocks belonging to it.
-///
-/// Subroutines are *single-entry*,
-/// i.e. calling a subroutine will execute the first block in the list of basic blocks.
-/// A subroutine may have multiple exits, which are identified by `Jmp::Return` instructions.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Sub {    //子函数
-    /// The name of the subroutine
-    pub name: String,
-    /// The basic blocks belonging to the subroutine.
-    /// The first block is also the entry point of the subroutine.
-    pub blocks: Vec<Term<Blk>>,
-    /// The calling convention used to call if known
+                    // https://github.com/fkie-cad/cwe_checker/issues/303
+    pub name: String,   //函数名
+    pub blocks: Vec<Term<Blk>>,    //包含的所有基本块，第一个块作为入口
     pub calling_convention: Option<String>,
 }
 

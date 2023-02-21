@@ -146,7 +146,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
         "CWE119", "CWE134", "CWE416", "CWE476", "Memory", "CWE190", "CWE789",   //指针推理
     ]);
 
-    //解析是否要进行字符串抽象或者指针推理（TODO），字符串抽象需要指针推理
+    //解析是否要进行字符串抽象或者指针推理（TODO），字符串抽象需要指针推理，指针推理需要函数签名计算
     let string_abstraction_needed = modules
         .iter() //iter：迭代器
         .any(|module| modules_depending_on_string_abstraction.contains(&module.name));
@@ -158,7 +158,6 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
     
     //以下几个分析过程在analysis下对应文件夹的mod.rs里
     
-    //函数签名计算为指针推理服务
     // Compute function signatures if required
     let function_signatures = if pi_analysis_needed {
         let (function_signatures, mut logs) = analysis_results.compute_function_signatures();
@@ -167,7 +166,8 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
     } else {
         None
     };
-    let analysis_results = analysis_results.with_function_signatures(function_signatures.as_ref());
+    let analysis_results = analysis_results.with_function_signatures(function_signatures.as_ref()); //as_ref转引用
+
     // Compute pointer inference if required
     let pi_analysis_results = if pi_analysis_needed {
         Some(analysis_results.compute_pointer_inference(&config["Memory"], args.statistics))
@@ -175,6 +175,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
         None
     };
     let analysis_results = analysis_results.with_pointer_inference(pi_analysis_results.as_ref());
+
     // Compute string abstraction analysis if required
     let string_abstraction_results =
         if string_abstraction_needed {
@@ -188,9 +189,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
     let analysis_results =
         analysis_results.with_string_abstraction(string_abstraction_results.as_ref());
 
-    // Print debug and then return.
-    // Right now there is only one debug printing function.     //似乎只能print出指针推理的部分
-    // When more debug printing modes exist, this behaviour will change!
+    //目前只能print出指针推理的debug
     if args.debug {
         cwe_checker_lib::analysis::pointer_inference::run(
             &analysis_results,

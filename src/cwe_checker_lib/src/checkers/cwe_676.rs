@@ -1,23 +1,4 @@
-/*!
-This module implements a check for CWE-676: Use of Potentially Dangerous Function.
-
-Potentially dangerous functions like memcpy can lead to security issues like buffer overflows.
-See <https://cwe.mitre.org/data/definitions/676.html> for a detailed description.
-
-How the check works:
-
-  * Calls to dangerous functions are flagged. The list of functions that are considered
-dangerous can be configured in config.json. The default list is based on
-<https://github.com/01org/safestringlib/wiki/SDL-List-of-Banned-Functions>.
-
-False Positives
-
-* None known
-*
-False Negatives
-
-* None known
-*/
+//没有误报和漏报
 use crate::prelude::*;
 use std::collections::{BTreeMap, HashMap, HashSet};
 
@@ -52,7 +33,7 @@ pub fn get_calls<'a>(
 ) -> Vec<(&'a str, &'a Tid, &'a str)> {
     let mut calls: Vec<(&str, &Tid, &str)> = Vec::new();
     for sub in subfunctions.values() {
-        calls.append(&mut get_calls_to_symbols(sub, dangerous_symbols));    //还没看
+        calls.append(&mut get_calls_to_symbols(sub, dangerous_symbols));    //还没看完
     }
     calls
 }
@@ -119,7 +100,7 @@ pub fn check_cwe(                               //调用时传入&AnalysisResult
     let config: Config = serde_json::from_value(cwe_params.clone()).unwrap();   //危险函数集合
     let prog: &Term<Program> = &project.program;
 
-    //subfunction：所有子函数函数
+    //subfunctions：所有子函数
     //external symbol：链接的库函数
     //dangerous symbol：对外部函数与config.json进行匹配
     //dangerous call：把程序用到的函数和上面的符号进行对比

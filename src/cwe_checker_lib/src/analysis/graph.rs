@@ -59,15 +59,18 @@ pub type Graph<'a> = DiGraph<Node<'a>, Edge<'a>>;
 /// For `CallSource`nodes the associated block is the callsite block (source)
 /// and the target block of the call.
 ///
-/// Basic blocks are allowed to be contained in more than one `Sub`.
+/// Basic blocks are allowed to be contained in more than one `Sub`.    //Sub暂时理解为子程序，有多个基本块，单入口多出口，
+///                                                                     //出口表示为Jmp::Return
+///                                                                     //定义在sub.rs中
 /// In the control flow graph such basic blocks occur once per subroutine they are contained in.
 /// For this reason, the nodes also carry a pointer to the corresponding subroutine with them
 /// to allow unambigous node identification.
 #[derive(Serialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Node<'a> {
 
-    //每一个基本块分为两个结点：BlkStart和BlkEnd，  //这俩到底是啥玩意，‘边’是边吗....
-    //用Block边连接
+    //每一个基本块分为两个结点：BlkStart和BlkEnd，代表开始和结束执行
+    //用Block边连接，表示time frame
+    //https://github.com/fkie-cad/cwe_checker/issues/304
     BlkStart(&'a Term<Blk>, &'a Term<Sub>),
     BlkEnd(&'a Term<Blk>, &'a Term<Sub>),
    
@@ -169,10 +172,12 @@ struct GraphBuilder<'a> {
     extern_subs: HashSet<Tid>,
     graph: Graph<'a>,
     /// Denotes the NodeIndices of possible call targets
+    /// call目标的节点索引
     call_targets: HashMap<Tid, (NodeIndex, NodeIndex)>,
     /// Denotes the NodeIndices of possible intraprocedural jump targets.
-    /// The keys are of the form (block_tid, sub_tid).
-    /// The values are of the form (BlkStart-node-index, BlkEnd-node-index).
+    /// jmp目标的节点索引
+    /// 键： (block_tid, sub_tid).
+    /// 值： (BlkStart-node-index, BlkEnd-node-index).
     jump_targets: HashMap<(Tid, Tid), (NodeIndex, NodeIndex)>,
     /// for each function the list of return addresses of the corresponding call sites
     return_addresses: HashMap<Tid, Vec<(NodeIndex, NodeIndex)>>,
@@ -197,22 +202,26 @@ impl<'a> GraphBuilder<'a> {
     /// Add start and end nodes of a block and the connecting edge.
     /// Also add the end node to the `block_worklist`.
     fn add_block(&mut self, block: &'a Term<Blk>, sub: &'a Term<Sub>) -> (NodeIndex, NodeIndex) {
-        let start = self.graph.add_node(Node::BlkStart(block, sub));
+
+
+        let start = self.graph.add_node(Node::BlkStart(block, sub));    //结点加入graph返回index
         let end = self.graph.add_node(Node::BlkEnd(block, sub));
-        self.jump_targets
-            .insert((block.tid.clone(), sub.tid.clone()), (start, end));
-        self.graph.add_edge(start, end, Edge::Block);
+        // 对于每一个块的起始和其所在函数，把它们作为图一个结点的权值        
+        self.jump_targets           //jmp目标节点索引，前面是键（唯一标识）后面是值
+            .insert((block.tid.clone(), sub.tid.clone()), (start, end));    
+
+        self.graph.add_edge(start, end, Edge::Block);   //加入边，从start到end，赋权值
         self.block_worklist.push(end);
-        (start, end)
+        (start, end)    //这个怎么接收的？
     }
 
     /// Add all blocks of the program to the graph.
     ///
     /// Each block is only added once,
-    /// i.e. for blocks contained in more than one function the extra nodes have to be added separately later.
-    /// The `sub` a block is associated with is the `sub` that the block is contained in in the `program` struct.
+    /// i.e. for blocks contained in more than one function, the extra nodes have to be added separately later.
+    /// The `sub` a block is associated with is the `sub` that the block is contained in in the `program` struct.   //这啥玩意
     fn add_program_blocks(&mut self) {
-        let subs = self.program.term.subs.values();
+        let subs = self.program.term.subs.values(); //subs代表所有已知用户函数，值为"Tid, Term<Sub>"对
         for sub in subs {
             for block in sub.term.blocks.iter() {
                 self.add_block(block, sub);
@@ -220,7 +229,7 @@ impl<'a> GraphBuilder<'a> {
         }
     }
 
-    /// add all subs to the call targets so that call instructions can be linked to the starting block of the corresponding sub.
+    /// add all subs to the call targets, so that call instructions can be linked to the starting block of the corresponding sub.
     fn add_subs_to_call_targets(&mut self) {
         for sub in self.program.term.subs.values() {
             if !sub.term.blocks.is_empty() {
@@ -481,7 +490,7 @@ impl<'a> GraphBuilder<'a> {
 /// Build the interprocedural control flow graph for a program term.
 pub fn get_program_cfg(program: &Term<Program>, extern_subs: HashSet<Tid>) -> Graph {
     let builder = GraphBuilder::new(program, extern_subs);
-    builder.build()
+    builder.build() //执行那个上面方法里的函数
 }
 
 /// Returns a map from function TIDs to the node index of the `BlkStart` node of the first block in the function.

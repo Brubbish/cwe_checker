@@ -6,10 +6,9 @@ mod builder;
 /// and an address to indicate where the term is located.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash, Clone, PartialOrd, Ord)]
 pub struct Tid {
-    /// The unique ID of the term.
-    id: String,
-    /// The address where the term is located.
-    pub address: String,
+    //https://github.com/fkie-cad/cwe_checker/issues/305
+    id: String,//唯一标识
+    pub address: String,//地址，不能作为唯一标识，因为转成IR后地址可能相同
 }
 
 impl Tid {

@@ -20,9 +20,9 @@ pub fn find_symbol<'a>(prog: &'a Term<Program>, name: &str) -> Option<(&'a Tid, 
     symbol
 }
 
-/// Match direct calls' target tids in the program's Subroutines        //tids == The unique ID of the term 
+/// Match direct calls' target tids in the program's Subroutines        // tids == The unique ID of the term 
 /// with the tids of the external symbols given to the function.
-/// When a match was found, add a triple of (caller name, callsite tid, callee name)
+/// When a match was found, add a triple of (caller name, callsite tid, callee name)    // 返回（调用函数、调用位置唯一id、被调函数）
 /// to a vector. Lastly, return the vector with all callsites of all given external symbols.
 pub fn get_calls_to_symbols<'a, 'b>(
     sub: &'a Term<Sub>,
@@ -30,12 +30,12 @@ pub fn get_calls_to_symbols<'a, 'b>(
 ) -> Vec<(&'a str, &'a Tid, &'a str)> {
     let mut calls: Vec<(&'a str, &'a Tid, &'a str)> = Vec::new();
 
-    //遍历块和边
+    //遍历块和jmp边
     for blk in sub.term.blocks.iter() {
         for jmp in blk.term.jmps.iter() {
-            if let Jmp::Call { target: dst, .. } = &jmp.term {
+            if let Jmp::Call { target: dst, .. } = &jmp.term {      //target=目标
                 if symbols.contains_key(dst) {
-                    calls.push((sub.term.name.as_str(), &jmp.tid, symbols.get(dst).unwrap()));  //三元组（term的名称、
+                    calls.push((sub.term.name.as_str(), &jmp.tid, symbols.get(dst).unwrap()));  //三元组（函数名、jmp标识、目标函数（？））
                 }
             }
         }

@@ -1,14 +1,7 @@
-//! This module implements a check for CWE-476: NULL Pointer Dereference.
-//!
-//! Functions like `malloc()` may return NULL values instead of pointers to indicate
-//! failed calls. If one tries to access memory through this return value without
-//! checking it for being NULL first, this can crash the program.
-//!
-//! See <https://cwe.mitre.org/data/definitions/476.html> for a detailed description.
-//!
 //! ## How the check works
 //!
-//! 这句话太难懂了....通过数据流分析，寻找执行流，该执行流的内存访问发生在判断（有可能返回空指针的）函数返回值的条件跳转之前，有则找到positive
+//! 这句话太难懂了....通过数据流分析，寻找执行流，
+//! 该执行流的内存访问发生在判断（有可能返回空指针的）函数返回值的条件跳转之前，有则找到positive
 //! Using dataflow analysis, we search for an execution path where a memory access using the return value of
 //! a symbol happens before the return value is checked through a conditional jump instruction.
 //!
@@ -89,7 +82,7 @@ pub fn check_cwe(
     let general_context = Context::new(project, pointer_inference_results, cwe_sender);
 
 
-    //这块的代码分析还有点问题
+    //这块的分析还有点问题
     for edge in general_context.get_graph().edge_references() {
         if let Edge::ExternCallStub(jmp) = edge.weight() {  //只取外部调用且类型为jmp的边
             if let Jmp::Call { target, .. } = &jmp.term {   //找到被调用的目标函数
@@ -97,7 +90,7 @@ pub fn check_cwe(
 
                     let node = edge.target();   //指向的基本块
                     let current_sub = match general_context.get_graph()[node] { //current_sub为被调用函数
-                        Node::BlkStart(_blk, sub) => sub,   //（为什么这么写？）
+                        Node::BlkStart(_blk, sub) => sub,   //（啥？）
                         _ => panic!(),
                     };
                     let mut context = general_context.clone();  //获取上下文
