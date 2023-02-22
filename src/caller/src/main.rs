@@ -160,6 +160,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
     
     // Compute function signatures if required
     let function_signatures = if pi_analysis_needed {
+        //传入project和CFG（AnalysisResults）
         let (function_signatures, mut logs) = analysis_results.compute_function_signatures();
         all_logs.append(&mut logs);
         Some(function_signatures)

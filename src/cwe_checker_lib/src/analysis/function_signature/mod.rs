@@ -57,9 +57,10 @@ fn generate_fixpoint_computation<'a>(
     let context = Context::new(project, graph);
     let mut computation = create_computation(context, None);
     // Set the node values for all function entry nodes.
+    //每个函数的起始的基本块设置初值
     for node in graph.node_indices() {
         if let Node::BlkStart(block, sub) = graph[node] {
-            if let Some(entry_block) = sub.term.blocks.get(0) {
+            if let Some(entry_block) = sub.term.blocks.get(0) { //下标为0（入口）
                 if entry_block.tid == block.tid {
                     // The node of a function entry point
                     let calling_convention = project

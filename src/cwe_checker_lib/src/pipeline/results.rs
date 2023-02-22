@@ -74,7 +74,7 @@ impl<'a> AnalysisResults<'a> {
         crate::analysis::pointer_inference::run(
             self,
             serde_json::from_value(config.clone()).unwrap(),
-            false,
+            true,   //
             print_stats,
         )
     }

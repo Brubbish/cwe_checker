@@ -205,10 +205,10 @@ impl<T: Context> Computation<T> {
     /// Each node will be visited at most max_steps times.
     /// If a node does not stabilize after max_steps visits, the end result will not be a fixpoint but only an intermediate result of a fixpoint computation.
     pub fn compute_with_max_steps(&mut self, max_steps: u64) {
-        let mut steps = vec![0; self.fp_context.get_graph().node_count()];
+        let mut steps = vec![0; self.fp_context.get_graph().node_count()];//nodecount：全图结点数量
         let mut non_stabilized_nodes = BTreeSet::new();
-        while let Some(priority) = self.worklist.iter().next_back().cloned() {
-            let priority = self.worklist.take(&priority).unwrap();
+        while let Some(priority) = self.worklist.iter().next_back().cloned() {  //.next_back，从后迭代，碰到.next停止
+            let priority = self.worklist.take(&priority).unwrap();  //.take：移除并赋值
             let node = self.priority_to_node_list[priority];
             if steps[node.index()] < max_steps {
                 steps[node.index()] += 1;
