@@ -54,15 +54,18 @@ fn generate_fixpoint_computation<'a>(
     project: &'a Project,
     graph: &'a Graph,
 ) -> Computation<GeneralizedContext<'a, Context<'a>>> {
-    let context = Context::new(project, graph);
+    let context = Context::new(project, graph);//返回context包括graph、project
+                                                        //和参数访问模式、参数可变函数
+    //？
     let mut computation = create_computation(context, None);
-    // Set the node values for all function entry nodes.
-    //每个函数的起始的基本块设置初值
+
+    //每个函数的入口基本块设置初值
     for node in graph.node_indices() {
         if let Node::BlkStart(block, sub) = graph[node] {
             if let Some(entry_block) = sub.term.blocks.get(0) { //下标为0（入口）
                 if entry_block.tid == block.tid {
                     // The node of a function entry point
+                    //用某种方法获得调用约定，①在project结构体里存放着，②猜一个？一直没运行到那边
                     let calling_convention = project
                         .get_specific_calling_convention(&sub.term.calling_convention)
                         .unwrap_or_else(|| {
@@ -89,9 +92,9 @@ fn generate_fixpoint_computation<'a>(
 
 /// Extract the function signatures from the computed fixpoint.
 ///
-/// This function needs to merge the signatures at all nodes corresponding to a function
-/// to ensure that parameter accesses on non-returning execution paths of a function
-/// are also recognized in the function signature.
+/// This function needs to merge the signatures at all nodes corresponding to a function  合并函数所有结点的签名
+/// to ensure that parameter accesses on non-returning execution paths of a function      以确保参数通过一个没有回路的执行流进行访问
+/// are also recognized in the function signature.                                        。。。
 fn extract_fn_signatures_from_fixpoint<'a>(
     project: &'a Project,
     graph: &'a Graph,
@@ -104,7 +107,7 @@ fn extract_fn_signatures_from_fixpoint<'a>(
         .keys()
         .map(|tid| (tid.clone(), FunctionSignature::new()))
         .collect();
-    for node in graph.node_indices() {
+    for node in graph.node_indices() {  //node_indices对图的节点索引进行迭代
         match fixpoint.get_node_value(node) {
             None => (),
             Some(NodeValue::Value(state)) => {
@@ -145,8 +148,12 @@ pub fn compute_function_signatures<'a>(
     project: &'a Project,
     graph: &'a Graph,
 ) -> (BTreeMap<Tid, FunctionSignature>, Vec<LogMessage>) {
-    let mut computation = generate_fixpoint_computation(project, graph);
+    let mut computation = generate_fixpoint_computation(project, graph);    //每个函数的传参用的寄存器和栈空间起始状态
+    
+    //没看懂
     computation.compute_with_max_steps(100);
+
+    //fn sig map得到了啥？
     let mut fn_sig_map = extract_fn_signatures_from_fixpoint(project, graph, computation);
     // Sanitize the parameters
     let mut logs = Vec::new();

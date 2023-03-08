@@ -4,19 +4,10 @@
 //!
 //! # General implementation notes
 //!
-//! A fixpoint problem is defined as a graph where:
-//! - Each node `n` gets assigned a value `val(n)` where the set of all values forms a partially ordered set.
-//! - Each edge `e` defines a rule `e:value -> value` how to compute the value at the end node given the value at the start node of the edge.
-//!
-//! A fixpoint is reached if an assignment of values to all nodes of the graph is found
-//! so that for all edges `e(val(start_node)) <= val(end_node)` holds.
-//! Usually one wants to find the smallest fixpoint,
-//! i.e. a fixpoint such that for each node `n` the value `val(n)` is as small as possible (with respect to the partial order)
-//! but also not less than a given starting value.
-//!
-//! As in the `graph` module, nodes are assumed to represent points in time,
-//! whereas edges represent state transitions or (artificial) information flow channels.
-//! In particular, only edges have transition functions and not nodes.
+// 不动点问题定义为，一个图其中，每个结点n有一个值val(n)，作为偏序集表示为其中所有值的集合；每条边e规定了一个规则“e:value -> value”
+// 如果找到了所有结点都有赋值了的位置（？）就找到了fixpoint，即所有边的e(val(start_node)) <= val(end_node)
+// 通常要找的是最小不动点，即所有结点n的val(n)尽可能小，但不能小于起始值
+// 在graph模块中描述的，边表示的是状态的转移或者（人为添加的）信息
 //!
 //! In the current implementation edge transition functions are also allowed to return `None`
 //! to indicate that no information flows through the edge.
@@ -26,14 +17,9 @@
 //!
 //! # How to compute the solution to a fixpoint problem
 //!
-//! To create a fixpoint computation one needs an object implementing the `Context` trait.
-//! This object contains all information necessary to compute fixpoints,
-//! like the graph or how to compute transition functions,
-//! but not the actual starting values of a fixpoint computation.
-//! With it, create a `Computation` object and then modify the node values through the object
-//! to match the intended starting conditions of the fixpoint computation.
-//! The `Computation` object also contains methods to actually run the fixpoint computation after the starting values are set
-//! and methods to retrieve the results of the computation.
+// 需要一个Context对象，包含了计算不动点所需要的信息，例如图以及如何计算转换函数（transition functions），并不是实际的初始值；
+// 利用它创建一个Computation对象，通过这个对象修改结点的值，来达到不动点计算的初始状态。
+// Computation对象也包含在确定起始值后进行不动点计算以及接受结果的方法
 
 use fnv::FnvHashMap;
 use petgraph::graph::{DiGraph, EdgeIndex, NodeIndex};
@@ -106,6 +92,9 @@ impl<T: Context> Computation<T> {
             .into_iter()
             .flatten()
             .collect();
+        //Return a vector where each element is a strongly connected component (scc).
+        //The order of node ids within each scc is arbitrary, but the order of the sccs is their postorder (reverse topological sort).
+
         Self::from_node_priority_list(fp_context, default_value, priority_sorted_nodes)
     }
 
@@ -118,15 +107,16 @@ impl<T: Context> Computation<T> {
         default_value: Option<T::NodeValue>,
         priority_sorted_nodes: Vec<NodeIndex>,
     ) -> Self {
+        //重新排序向量priority_sorted_nodes，下标大（值小）的放在后面
         let mut node_to_index = BTreeMap::new();
-        for (i, node_index) in priority_sorted_nodes.iter().enumerate() {
+        for (i, node_index) in priority_sorted_nodes.iter().enumerate() {   //enumerate遍历元素和下标
             node_to_index.insert(node_index, i);
         }
         let node_priority_list: Vec<usize> = node_to_index.values().copied().collect();
         let mut worklist = BTreeSet::new();
         // If a default value exists, all nodes are added to the worklist. If not, the worklist is empty
         let mut node_values: FnvHashMap<NodeIndex, T::NodeValue> = FnvHashMap::default();
-        if let Some(default) = default_value {
+        if let Some(default) = default_value {//？
             for i in 0..priority_sorted_nodes.len() {
                 worklist.insert(i);
                 node_values.insert(NodeIndex::new(i), default.clone());
@@ -205,10 +195,11 @@ impl<T: Context> Computation<T> {
     /// Each node will be visited at most max_steps times.
     /// If a node does not stabilize after max_steps visits, the end result will not be a fixpoint but only an intermediate result of a fixpoint computation.
     pub fn compute_with_max_steps(&mut self, max_steps: u64) {
-        let mut steps = vec![0; self.fp_context.get_graph().node_count()];//nodecount：全图结点数量
+        let mut steps = vec![0; self.fp_context.get_graph().node_count()]; //nodecount：全图结点数量
         let mut non_stabilized_nodes = BTreeSet::new();
-        while let Some(priority) = self.worklist.iter().next_back().cloned() {  //.next_back，从后迭代，碰到.next停止
-            let priority = self.worklist.take(&priority).unwrap();  //.take：移除并赋值
+        while let Some(priority) = self.worklist.iter().next_back().cloned() {
+            //.next_back，从后迭代，碰到.next的指针停止
+            let priority = self.worklist.take(&priority).unwrap(); //.take：移除并赋值。
             let node = self.priority_to_node_list[priority];
             if steps[node.index()] < max_steps {
                 steps[node.index()] += 1;

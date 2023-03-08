@@ -24,11 +24,11 @@ pub struct State {
 impl State {
     /// Create a new state representing the state at the start of the function
     /// given by the `function_tid` and corresponding function signature.
-    ///
+    ///由tid和函数签名表示出函数初始状态。该状态下只能看到本函数的栈帧
     /// Only the bounds of the current stack frame are known in this state,
     /// since there are no memory accesses to observe prior to the function start.
     pub fn new(function_tid: &Tid, function_sig: &FunctionSignature, project: &Project) -> State {
-        let stack_id =
+        let stack_id =//函数对应栈帧编号，用函数名、寄存器名称（RSP....）、path_hints   ----identifier.rs
             AbstractIdentifier::from_var(function_tid.clone(), &project.stack_pointer_register);
         let stack_upper_bound: i64 = match project.stack_pointer_register.name.as_str() {
             "ESP" => 4,

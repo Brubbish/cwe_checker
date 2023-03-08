@@ -38,9 +38,10 @@
                     "kind": "bin"
                 }
             },
-            "args": [                
-                //" --partial CWE676",
-                "/home/bruce/Desktop/cwe_119.out",
+            "args": [
+                "/home/bruce/Desktop/cwe119-test/off-by-one-b00ks",         
+                // "--partial CWE119",
+
             ],
             "cwd": "${workspaceFolder}"
         },

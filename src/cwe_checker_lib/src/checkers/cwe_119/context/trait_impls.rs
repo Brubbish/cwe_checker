@@ -118,7 +118,7 @@ impl<'a> crate::analysis::forward_interprocedural_fixpoint::Context<'a> for Cont
                 if let Some(extern_symbol) = self.project.program.term.extern_symbols.get(target) {
                     let mut extern_call_handler =
                         ExternCallHandler::new(self, &mut state, extern_symbol, call);
-                    extern_call_handler.handle_call();
+                    extern_call_handler.handle_call();  //cwe_119
                 } else {
                     self.log_debug(
                         &call.tid,

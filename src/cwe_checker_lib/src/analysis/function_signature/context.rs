@@ -28,7 +28,7 @@ impl<'a> Context<'a> {
             graph,
             project,
             param_access_stubs: stubs::generate_param_access_stubs(),
-            stubbed_variadic_symbols: stubs::get_stubbed_variadic_symbols(),
+            stubbed_variadic_symbols: stubs::get_stubbed_variadic_symbols(),    //variadic可变参数
         }
     }
 

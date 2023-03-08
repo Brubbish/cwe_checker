@@ -32,6 +32,7 @@ impl State {
     /// Generate a new state corresponding to the function start state for the given function TID.
     ///
     /// Only registers that are parameter registers in the given calling convention are added to the tracked IDs.
+    /// 只跟踪函数传参用的寄存器
     pub fn new(
         func_tid: &Tid,
         stack_register: &Variable,
@@ -45,7 +46,7 @@ impl State {
             let value =
                 DataDomain::from_target(id.clone(), Bitvector::zero(var.size.into()).into());
             register_map.insert(var.clone(), value);
-            if var != stack_register {
+            if var != stack_register {  //不相等则跟踪（？
                 tracked_ids.insert(id, AccessPattern::new());
             }
         }

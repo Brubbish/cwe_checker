@@ -14,7 +14,7 @@ use crate::{
 use std::collections::BTreeMap;
 
 /// Returns a map that maps the names of known extern functions to the access patterns for their parameters.
-///
+/// 访问模式
 /// The access patterns are ordered in the same order as the parameters
 /// (i.e. the first access pattern corresponds to the first parameter and so on).
 pub fn generate_param_access_stubs() -> BTreeMap<&'static str, Vec<AccessPattern>> {

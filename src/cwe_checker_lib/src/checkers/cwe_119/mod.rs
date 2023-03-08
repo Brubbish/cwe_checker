@@ -36,7 +36,7 @@ pub fn check_cwe(
         crate::analysis::graph::get_entry_nodes_of_subs(analysis_results.control_flow_graph)    //遍历每个函数入口的基本块
     {
         if let Some(function_sig) = analysis_results.function_signatures.unwrap().get(&sub_tid) {
-            let fn_start_state = State::new(&sub_tid, function_sig, analysis_results.project);
+            let fn_start_state = State::new(&sub_tid, function_sig, analysis_results.project);//栈id和栈的上下界
             fixpoint_computation.set_node_value(
                 entry_node_of_sub,
                 crate::analysis::interprocedural_fixpoint_generic::NodeValue::Value(fn_start_state),

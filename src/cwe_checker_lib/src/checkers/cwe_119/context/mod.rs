@@ -34,7 +34,7 @@ pub struct Context<'a> {
     /// A map that maps abstract identifiers representing the values of parameters at callsites
     /// to the corresponding value (in the context of the caller) according to the pointer inference analysis.
     pub param_replacement_map: HashMap<AbstractIdentifier, Data>,
-    /// A map that maps the TIDs of calls to allocatingfunctions (like malloc, realloc and calloc)
+    /// A map that maps the TIDs of calls to allocating functions (like malloc, realloc and calloc)
     /// to the value representing the size of the allocated memory object according to the pointer inference analysis.
     pub malloc_tid_to_object_size_map: HashMap<Tid, Data>,
     /// A map that maps the TIDs of jump instructions to the function TID of the caller.
@@ -61,6 +61,7 @@ impl<'a> Context<'a> {
             graph: analysis_results.control_flow_graph,
             pointer_inference: analysis_results.pointer_inference.unwrap(),
             function_signatures: analysis_results.function_signatures.unwrap(),
+            
             callee_to_callsites_map: compute_callee_to_call_sites_map(project),
             param_replacement_map: param_replacement::compute_param_replacement_map(
                 analysis_results,
