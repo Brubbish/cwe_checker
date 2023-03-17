@@ -148,7 +148,7 @@ impl<'a> Context<'a> {
             } else {
                 (Some(BoundsMetadata::new(0)), None)
             }
-        } else if object_id == current_stack_frame_id {
+        } else if object_id == current_stack_frame_id { //free()跳到这
             let stack_frame_upper_bound = self
                 .function_signatures
                 .get(object_id.get_tid())

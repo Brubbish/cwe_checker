@@ -177,7 +177,7 @@ impl State {
     }
 
     /// Recursively evaluate the value of an expression in the current state.
-    /// Should only be called by [`State::eval`].
+    /// Should only be called by [`State::eval`].   变量、常量（bitvector表示）、位操作、一元表达式、强制转换、不受支持的操作和不确定的值（但知道值的位数）、Subpiece
     fn eval_recursive(&self, expression: &Expression) -> Data {
         use Expression::*;
         match expression {

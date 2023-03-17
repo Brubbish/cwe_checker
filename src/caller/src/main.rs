@@ -128,7 +128,7 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
 
     let (binary, project, mut all_logs) =
         disassemble_binary(&binary_file_path, bare_metal_config_opt, args.verbose)?; //返回byte vector格式的binary、Project结构体、vector格式的logs
-
+        //上面也用到了不动点计算
     // Generate the control flow graph of the program
     let extern_sub_tids = project
         .program
@@ -195,8 +195,8 @@ fn run_with_ghidra(args: &CmdlineArgs) -> Result<(), Error> {
         cwe_checker_lib::analysis::pointer_inference::run(
             &analysis_results,
             serde_json::from_value(config["Memory"].clone()).unwrap(),  //涉及到动态分配内存的函数
-            true,
             false,
+            true,
         );
         return Ok(());
     }

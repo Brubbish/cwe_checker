@@ -84,7 +84,7 @@ impl<'a> Context<'a> {
     }
 
     /// Compute the size of a heap object created by a malloc-like function call.
-    ///
+    /// 计算创建堆的大小，如果有多个可能的值则返回最小值
     /// Uses the path hints in the given `object_id` to concretize the size if possible.
     /// If the size may be unknown but at least one possible absolute value for the size is found,
     /// then the absolute value is used and unknown origins of the size value are ignored.
@@ -99,9 +99,9 @@ impl<'a> Context<'a> {
             );
             let object_size = self.recursively_substitute_param_values(&object_size);
             let object_size = match object_size.get_absolute_value() {
-                Some(size) => {
-                    if let Ok((lower_bound, upper_bound)) = size.try_to_offset_interval() {
-                        let (lower_bound, upper_bound) = (
+                Some(size) => {//object_size.get_absolute_value()的类型为IntervalDomain
+                    if let Ok((lower_bound, upper_bound)) = size.try_to_offset_interval() {//size即object_size，转成64位
+                        let (lower_bound, upper_bound) = (  //len都变成64
                             Bitvector::from_i64(lower_bound)
                                 .into_resize_signed(object_size.bytesize()),
                             Bitvector::from_i64(upper_bound)

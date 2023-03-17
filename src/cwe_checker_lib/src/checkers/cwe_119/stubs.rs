@@ -174,8 +174,8 @@ impl<'a, 'b> ExternCallHandler<'a, 'b> {
     /// Generic call handler.
     /// Assumes that the first byte of every parameter memory object is accessed by the called function.
     fn handle_generic_call(&mut self) {
-        for param in &self.fn_symbol.parameters {
-            self.context.check_param_at_call(
+        for param in &self.fn_symbol.parameters {   //传参的寄存器
+            self.context.check_param_at_call(   //栈id和上下界、
                 self.state,
                 param,
                 &self.jump.tid,

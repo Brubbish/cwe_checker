@@ -144,12 +144,12 @@ impl<T: Context> Computation<T> {
 
     /// Merge the value at a node with some new value.
     fn merge_node_value(&mut self, node: NodeIndex, value: T::NodeValue) {
-        if let Some(old_value) = self.node_values.get(&node) {
+        if let Some(old_value) = self.node_values.get(&node) {  //?
             let merged_value = self.fp_context.merge(&value, old_value);
             if merged_value != *old_value {
                 self.set_node_value(node, merged_value);
             }
-        } else {
+        } else {//找不到node对应的值
             self.set_node_value(node, value);
         }
     }
@@ -159,7 +159,7 @@ impl<T: Context> Computation<T> {
         let (start_node, end_node) = self
             .fp_context
             .get_graph()
-            .edge_endpoints(edge)
+            .edge_endpoints(edge)//找到边的起始和终点
             .expect("Edge not found");
         if let Some(start_val) = self.node_values.get(&start_node) {
             if let Some(new_end_val) = self.fp_context.update_edge(start_val, edge) {
@@ -168,9 +168,9 @@ impl<T: Context> Computation<T> {
         }
     }
 
-    /// Update all outgoing edges of a node.
+    /// Update all outgoing edges of a node.//出边
     fn update_node(&mut self, node: NodeIndex) {
-        let edges: Vec<EdgeIndex> = self
+        let edges: Vec<EdgeIndex> = self//遍历这个节点的所有边
             .fp_context
             .get_graph()
             .edges(node)
@@ -200,12 +200,13 @@ impl<T: Context> Computation<T> {
         while let Some(priority) = self.worklist.iter().next_back().cloned() {
             //.next_back，从后迭代，碰到.next的指针停止
             let priority = self.worklist.take(&priority).unwrap(); //.take：移除并赋值。
-            let node = self.priority_to_node_list[priority];
-            if steps[node.index()] < max_steps {
+            let node = self.priority_to_node_list[priority];    //priority_to_node_list
+            if steps[node.index()] < max_steps {    //每个节点给100次
                 steps[node.index()] += 1;
-                self.update_node(node);
+                self.update_node(node); //更新node，过程间分析
+                
             } else {
-                non_stabilized_nodes.insert(priority);
+                non_stabilized_nodes.insert(priority);  //worklist算法
             }
         }
         // After the algorithm finished, the new worklist is the list of non-stabilized nodes

@@ -147,11 +147,11 @@ impl<'a, T: Context<'a>> GeneralFPContext for GeneralizedContext<'a, T> {
     /// corresponding to the type of the provided edge.
     fn update_edge(
         &self,
-        node_value: &Self::NodeValue,
+        node_value: &Self::NodeValue,//传入edge起始结点的值
         edge: EdgeIndex,
     ) -> Option<Self::NodeValue> {
         let graph = self.context.get_graph();
-        let (start_node, end_node) = graph.edge_endpoints(edge).unwrap();
+        let (start_node, end_node) = graph.edge_endpoints(edge).unwrap();//边的起始和终点
 
         match graph.edge_weight(edge).unwrap() {
             Edge::Block => {
@@ -159,8 +159,12 @@ impl<'a, T: Context<'a>> GeneralFPContext for GeneralizedContext<'a, T> {
                 let value = node_value.unwrap_value();
                 let defs = &block_term.term.defs;
                 let end_val = defs.iter().try_fold(value.clone(), |accum, def| {
-                    self.context.update_def(&accum, def)
+                    self.context.update_def(&accum, def)    //循环n次
                 });
+                // try_fold：对每个def迭代操作，第一个参数为初始值，第二个参数为操作
+                // |accum, def|：操作，accum为每次迭代前保留的值，def为每次迭代内容
+                // 会进行多次update_def，返回赋给accum
+                
                 end_val.map(NodeValue::Value)
             }
             Edge::CallCombine(_) => Some(Self::NodeValue::Value(node_value.unwrap_value().clone())),

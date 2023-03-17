@@ -28,7 +28,7 @@ pub fn disassemble_binary(
         verbose_flag,
     )?;
     // Normalize the project and gather log messages generated from it.
-    all_logs.append(&mut project.normalize());
+    all_logs.append(&mut project.normalize());//expression_propagation进行不动点计算
 
     // Generate the representation of the runtime memory image of the binary
     let mut runtime_memory_image = if let Some(bare_metal_config) = bare_metal_config_opt.as_ref() {

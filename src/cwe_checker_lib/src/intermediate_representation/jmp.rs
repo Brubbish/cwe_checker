@@ -10,6 +10,9 @@ use crate::prelude::*;
 /// Note that this semantic information may not always be correct.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Jmp {
+    /// 直接跳转到目标 `Blk` term
+    /// 通过计算，间接跳转
+    /// 条件跳转
     /// A direct intraprocedural jump to the targeted `Blk` term identifier.
     Branch(Tid),
     /// An indirect intraprocedural jump to the address that the given expression evaluates to.

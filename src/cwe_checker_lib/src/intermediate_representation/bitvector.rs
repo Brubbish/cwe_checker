@@ -303,10 +303,10 @@ impl BitvectorExtended for Bitvector {
 
     /// Resize `self` to the target byte size by either sign extending or truncating `self`.
     fn into_resize_signed(self, size: ByteSize) -> Self {
-        if self.width() < size.into() {
+        if self.width() < size.into() { //self对象宽度小于size（以字节位数比较）
             self.into_sign_extend(size).unwrap()
         } else {
-            self.into_truncate(size).unwrap()
+            self.into_truncate(size).unwrap()   //into_truncate将对象转换为指定长的截断对象
         }
     }
 }

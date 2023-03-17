@@ -44,7 +44,7 @@ impl<'a> crate::analysis::forward_interprocedural_fixpoint::Context<'a> for Cont
                 }
             }
             Def::Store { address: _, value } => {
-                let address = match self.pointer_inference.eval_address_at_def(&def.tid) {
+                    let address = match self.pointer_inference.eval_address_at_def(&def.tid) {//ir对应的地址
                     Some(address) => address,
                     None => return None, // There seems to be no pointer inference state here.
                 };
@@ -107,11 +107,12 @@ impl<'a> crate::analysis::forward_interprocedural_fixpoint::Context<'a> for Cont
         state_before_call.cloned()
     }
 
-    /// For calls to extern symbols check whether any parameter may point out of bounds of the corresponding memory object.
+    /// 检查调用外部函数的时候是否有参数造成越界
     /// Note that we do not know whether the called function accesses memory areas of certain sizes.
     /// Thus we only check that parameter pointers themselves point into the memory object
     /// but not whether certain address ranges around a pointer are still inside the corresponding memory object.
     fn update_call_stub(&self, state: &State, call: &Term<Jmp>) -> Option<State> {
+        //传入栈id、上下界；caller在程序和ir中的地址、callee程序中的入口、结束地址
         let mut state = state.clone();
         match &call.term {
             Jmp::Call { target, .. } => {
@@ -130,7 +131,7 @@ impl<'a> crate::analysis::forward_interprocedural_fixpoint::Context<'a> for Cont
                 if let Some(cconv) = self.project.get_standard_calling_convention() {
                     for param in &cconv.integer_parameter_register {
                         let param_arg = Arg::from_var(param.clone(), None);
-                        self.check_param_at_call(&mut state, &param_arg, &call.tid, None);
+                        self.check_param_at_call(&mut state, &param_arg, &call.tid, None);  //cwe119
                     }
                 }
             }

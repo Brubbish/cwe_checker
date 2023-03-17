@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 /// The bounds of memory objects are computed the first time an access to it is observed.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct State {
-    /// The abstract identifier of the stack frame of the function that the state belongs to.
+    /// 记录当前状态所在的函数堆栈
     stack_id: AbstractIdentifier,
     /// The lower bounds of all memory objects for which accesses have been observed.
     object_lower_bounds: DomainMap<AbstractIdentifier, BitvectorDomain, UnionMergeStrategy>,
@@ -66,7 +66,7 @@ impl State {
         context: &Context,
     ) -> Vec<String> {
         let mut out_of_bounds_access_warnings = Vec::new();
-        for (id, offset) in address.get_relative_values() {
+        for (id, offset) in address.get_relative_values() {//relative_values：相对地址
             if !self.object_lower_bounds.contains_key(id) {
                 self.compute_bounds_of_id(id, context);
             }
@@ -103,7 +103,7 @@ impl State {
                             .insert(id.clone(), BitvectorDomain::new_top(address.bytesize()));
                     }
                 }
-                if let Ok(upper_bound) = self.object_upper_bounds.get(id).unwrap().try_to_offset() {
+                if let Ok(upper_bound) = self.object_upper_bounds.get(id).unwrap().try_to_offset() {    //if let Ok：简化match，不用Err()
                     if upper_bound < upper_offset + (u64::from(value_size) as i64) {
                         out_of_bounds_access_warnings.push(format!("For the object ID {} access to the offset {} (size {}) may overflow the upper object bound of {}.",
                             id,
@@ -142,6 +142,10 @@ impl State {
                 }
             }
         }
+        
+        if !out_of_bounds_access_warnings.is_empty() {
+            println!("{:?}",out_of_bounds_access_warnings);            
+        }
 
         out_of_bounds_access_warnings
     }
@@ -161,7 +165,7 @@ impl State {
             None => BitvectorDomain::new_top(object_id.bytesize()),
         };
         let upper_bound = match upper_bound {
-            Some(bound_metadata) => Bitvector::from_i64(bound_metadata.resulting_bound)
+            Some(bound_metadata) => Bitvector::from_i64(bound_metadata.resulting_bound)//bound_metadata=upper_bound
                 .into_resize_signed(object_id.bytesize())
                 .into(),
             None => BitvectorDomain::new_top(object_id.bytesize()),
