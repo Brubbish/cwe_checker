@@ -148,18 +148,18 @@ impl<'a> Context<'a> {
             } else {
                 (Some(BoundsMetadata::new(0)), None)
             }
-        } else if object_id == current_stack_frame_id { //free()跳到这
+        } else if object_id == current_stack_frame_id { 
             let stack_frame_upper_bound = self
                 .function_signatures
                 .get(object_id.get_tid())
                 .unwrap()
                 .get_stack_params_total_size();
             (None, Some(BoundsMetadata::new(stack_frame_upper_bound)))
-        } else if object_id.get_tid() == current_stack_frame_id.get_tid()
+        } else if object_id.get_tid() == current_stack_frame_id.get_tid()   
             && object_id.get_path_hints().is_empty()
         {
             // Handle parameter IDs
-            self.compute_bounds_of_param_id(object_id)
+            self.compute_bounds_of_param_id(object_id)  //free()跳到这
         } else {
             // The type of object is unknown, thus the size restrictions are also unknown.
             (None, None)
